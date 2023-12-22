@@ -14,9 +14,19 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 function createMarkers(data) {
     // Create a function to determine the color based on depth
     function getColor(depth) {
-        return depth > 100 ? '#d73027' :
-            depth > 50 ? '#4575b4' :
-                '#91bfdb';
+                if (depth >90) {
+                    return 'red';
+                  } else if (depth > 70) {
+                    return 'pink';
+                  } else if (depth > 50) {
+                    return 'orange';
+                  } else if (depth > 30){
+                    return 'yellow';
+                } else if (depth > 10){
+                    return 'green';
+                  } else {
+                    return 'blue'; 
+                  }
     }
 
     // Create a function to determine the radius based on magnitude
@@ -24,19 +34,30 @@ function createMarkers(data) {
         return magnitude * 5;
     }
 
-    // Create a legend
+// Create popup that provide information about the earthquake when its associated marker is clicked.
+function onEachFeature(feature, layer) {
+    layer.bindPopup("<h3>" + feature.properties.place +
+    "</h3>Magnitude: <strong>" + feature.properties.mag + "</strong><hr><p>" 
+    + new Date(feature.properties.time) + "</p>");
+}
+// Create a function to determine the radius based on magnitude
+function getRadius(magnitude) {
+    return magnitude * 5;
+}
+
+    // Create legend that will provide context for your map data
     var legend = L.control({ position: 'bottomright' });
 
     legend.onAdd = function (map) {
         var div = L.DomUtil.create('div', 'info legend');
         var depths = [-10, 10, 30, 50, 70, 90];
-        var labels = [];
+        let colors = ['blue','green','yellow', 'orange', 'pink', 'red']
 
         div.innerHTML += '<h4>Depth</h4>';
 
         for (var i = 0; i < depths.length; i++) {
             div.innerHTML +=
-                '<i style="background:' + getColor(depths[i] + 1) + '"></i> ' +
+                '<i style="background:' + colors[i] + '"></i> ' +
                 depths[i] + (depths[i + 1] ? '&ndash;' + depths[i + 1] + '<br>' : '+');
         }
 
@@ -60,6 +81,8 @@ function createMarkers(data) {
         onEachFeature: function (feature, layer) {
             layer.bindPopup("<h3>" + feature.properties.place +
                 "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+
+                      
         }
     }).addTo(myMap);
 }
